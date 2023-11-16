@@ -1,0 +1,19 @@
+ping
+ping abc
+
+count
+count a b c d
+count a
+count a             b
+count a             b   
+ping 
+check Andreea 132 b
+times
+
+ping
+times
+times abc
+check
+
+ping
+stop
