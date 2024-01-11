@@ -126,27 +126,43 @@ impl<'a> AsciiTable<'a> {
         self.print_horizontal_line(&max_widths);
     }
 
-    fn o_print<W: Write>(&self, out: &mut W) {
+    fn o_print<W: Write>(&self, out: &mut W) -> Result<(), Box<dyn Error>> {
         // calculate maximum width for each column
         let max_widths = self.calculate_max_width();
 
         // print header
-        let _ = self.o_print_horizontal_line(&max_widths, out);
-        let _ = self.o_print_row(&self.headers, &max_widths, out);
-        if self.sep == 0 {
-            let _ = self.o_print_horizontal_line(&max_widths, out);
+
+        if let Err(err) = self.o_print_horizontal_line(&max_widths, out) {
+            eprintln!("Error writing in file: {}", err);
+        }
+        if let Err(err) = self.o_print_row(&self.headers, &max_widths, out) {
+            eprintln!("Error writing in file: {}", err);
         }
 
-        //print rows
+        if self.sep == 0 {
+            if let Err(err) = self.o_print_horizontal_line(&max_widths, out) {
+                eprintln!("Error writing in file: {}", err);
+            }
+        }
+
+        // print rows
         for row in &self.rows {
             if self.sep != 0 {
-                let _ = self.o_print_horizontal_line(&max_widths, out);
+                if let Err(err) = self.o_print_horizontal_line(&max_widths, out) {
+                    eprintln!("Error writing in file: {}", err);
+                }
             }
-            let _ = self.o_print_row(row, &max_widths, out);
+            if let Err(err) = self.o_print_row(row, &max_widths, out) {
+                eprintln!("Error writing in file: {}", err);
+            }
         }
 
         // print bottom border
-        let _ = self.o_print_horizontal_line(&max_widths, out);
+        if let Err(err) = self.o_print_horizontal_line(&max_widths, out) {
+            eprintln!("Error writing in file: {}", err);
+        }
+
+        Ok(())
     }
 
     fn print_horizontal_line(&self, max_widths: &[usize]) {
@@ -161,9 +177,14 @@ impl<'a> AsciiTable<'a> {
         out: &mut W,
     ) -> Result<(), Box<dyn Error>> {
         for &max_width in max_widths {
-            write!(out, "+{:-<width$}", "", width = max_width + 2)?;
+            if let Err(err) = write!(out, "+{:-<width$}", "", width = max_width + 2) {
+                eprintln!("Error writing in file: {}", err);
+            }
         }
-        writeln!(out, "+")?;
+
+        if let Err(err) = writeln!(out, "+") {
+            eprintln!("Error writing in file: {}", err);
+        }
         Ok(())
     }
 
@@ -204,7 +225,10 @@ impl<'a> AsciiTable<'a> {
                 write!(out, "{}", cell.format_left(max_width))?;
             }
         }
-        writeln!(out)?;
+        if let Err(err) = writeln!(out) {
+            eprintln!("Error writing in file: {}", err);
+        }
+
         Ok(())
     }
 }
@@ -310,8 +334,12 @@ fn main() -> Result<(), Box<dyn Error>> {
             "Check the output file created or overwritten: {}",
             output_file
         );
-        table.o_print(&mut out);
-        out.flush()?;
+        if let Err(err) = table.o_print(&mut out) {
+            eprintln!("Error printing table: {}", err);
+        }
+        if let Err(err) = out.flush() {
+            eprintln!("Error closing file: {}", err);
+        }
     }
     Ok(())
 }
