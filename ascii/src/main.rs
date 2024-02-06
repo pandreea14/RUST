@@ -24,16 +24,6 @@ impl Record {
             .keys()
             .map(|s| s.to_string())
             .collect();
-
-        // let mut headers = Vec::new();
-        // let mut lines = data.lines();
-
-        // if let Some(header_line) = lines.next() {
-        //     for field in header_line.split(',') {
-        //         headers.push(field.trim().to_string());
-        //     }
-        // }
-
         headers
     }
 }
@@ -48,19 +38,15 @@ impl TableCell {
             content: content.to_string(),
         }
     }
-
     fn content_len(&self) -> usize {
         self.content.len()
     }
-
     fn format_left(&self, width: usize) -> String {
         format!(" {:<width$} |", self.content, width = width)
     }
-
     fn format_center(&self, width: usize) -> String {
         format!(" {:^width$} |", self.content, width = width)
     }
-
     fn format_right(&self, width: usize) -> String {
         format!(" {:>width$} |", self.content, width = width)
     }
@@ -84,12 +70,10 @@ impl<'a> AsciiTable<'a> {
             alignment: align,
         }
     }
-
     fn add_row(&mut self, row_data: Vec<&str>) {
         let row_cells: Vec<TableCell> = row_data.into_iter().map(TableCell::new).collect();
         self.rows.push(row_cells);
     }
-
     fn calculate_max_width(&self) -> Vec<usize> {
         let num_columns = self.headers.len();
         let mut max_widths = vec![0; num_columns];
@@ -102,7 +86,6 @@ impl<'a> AsciiTable<'a> {
 
         max_widths
     }
-
     fn print(&self) {
         // calculate maximum width for each column
         let max_widths = self.calculate_max_width();
@@ -125,13 +108,11 @@ impl<'a> AsciiTable<'a> {
         // print bottom border
         self.print_horizontal_line(&max_widths);
     }
-
     fn o_print<W: Write>(&self, out: &mut W) -> Result<(), Box<dyn Error>> {
         // calculate maximum width for each column
         let max_widths = self.calculate_max_width();
 
         // print header
-
         if let Err(err) = self.o_print_horizontal_line(&max_widths, out) {
             eprintln!("Error writing in file: {}", err);
         }
@@ -244,13 +225,11 @@ fn read_csv(input_file: &str) -> Result<Vec<Record>, Box<dyn Error>> {
 
     for result in reader.records() {
         let record = result?;
-
         let instance = Record {
             atomic_number: record.get(0).unwrap_or_default().to_string(),
             symbol: record.get(1).unwrap_or_default().to_string(),
             name: record.get(2).unwrap_or_default().to_string(),
         };
-
         data.push(instance);
     }
 
